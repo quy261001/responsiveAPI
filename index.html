@@ -20,23 +20,24 @@
 </head>
 <body>
   <form class="wrapper" autocomplete="off">
-    <input type="text" name="id" placeholder="id" required />
-    <input type="text" name="title" placeholder="title" required />
+    <input type="text" name="id" placeholder="id"  disabled style="opacity: 0.5"/>
+    <input type="text" name="title" placeholder="title"/>
     <input
       type="text"
       name="createdAt"
       placeholder="createdAt"
       required
     />
-    <input type="text" name="image" placeholder="URL image" required />
+    <input type="text" name="image" placeholder="URL image" />
     <input type="text" name="content" placeholder="content"/>
     <button type="submit" class="form-submit">POST</button>
+    <button  class="form-update">Reset Form</button>
   </form>
   <div class="wrap">
     <table class="head">
       <tbody>
         <tr>
-          <td>ID</td>
+          <td class="product-id">ID</td>
           <td>Title</td>
           <td>createdAt</td>
           <td>Image</td>
@@ -84,14 +85,14 @@
       </li>
 
       <div class="page-config">
-         <input type="number" value="10" min="1" max="100" id="myInput">items/page</input>
-         <!-- <select name="" id="mySelect">
+         <!-- <input type="number" value="10" min="1" max="100" id="myInput">items/page</input> -->
+          <select name="" id="mySelect">
           <option>10</option>
           <option>20</option>
           <option>30</option>
           <option>40</option>
           <option>50</option>
-        </select> -->
+        </select> 
       </div>
       <div class="total-page"></div>
       <div class="total-item"></div>

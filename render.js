@@ -1,7 +1,7 @@
 import {toApi,postApi,putApi,deleteApi} from './script.js'
-window.addEventListener('load', () => {
+window.addEventListener('load',  () => {
   toApi();
-  postApi();
-  deleteApi();
-  putApi();
+ postApi();
+ putApi();
+ deleteApi()
 })

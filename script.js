@@ -3,6 +3,7 @@ const wrapper = document.querySelector(".wrapper");
 const sourceList = document.querySelector(".source-list");
 const tbodyScroll = document.querySelector(".tbody-scroll");
 const formSubmit = document.querySelector(".form-submit");
+const formRemoveUpdate = document.querySelector(".form-update");
 const btnNext = document.querySelector(".btn-next");
 const btnPrev = document.querySelector(".btn-prev");
 const btnFisrt = document.querySelector(".btn-fisrt");
@@ -24,7 +25,7 @@ const sendHttpRequest = (method, url, data) => {
       xhr.setRequestHeader('Content-Type', 'application/json');
     }
     xhr.onload = () => {
-      if(xhr.status >= 400 && xhr.status == 204) {
+      if(xhr.status >= 400) {
         reject(xhr.response);
       }else {
         resolve(xhr.response);
@@ -37,55 +38,74 @@ const sendHttpRequest = (method, url, data) => {
   });
   return promise;
 };
+function reloadBlogs() {
+    return  getBlog(function(blogs) {
+      getSource(blogs);
+      fresherItem (blogs);
+})
+}
+function getPage() {
+  sendHttpRequest('GET', url).then( data => {
+    return  getBlog(function(blogs) {
+      getSource(blogs);
+      fresherItem (blogs);
+})
+ })
+}
 // PUT
- function updateSource({ id, title, createdAt, image, content }) {
+async function updateSource({ id, title, createdAt, image, content }) {
    sendHttpRequest('PUT', `${url}/${id}`, { id,title, createdAt, image, content })
+   .then(data => {
+    reloadBlogs()
+})
 }
 // Post
- function addPost({ id, title, createdAt, image, content }) {
-   sendHttpRequest('POST', url, { id, title, createdAt, image, content});
+async function addPost({ id, title, createdAt, image, content }) {
+   sendHttpRequest('POST', url, { id, title, createdAt, image, content})
+   .then(data => {
+    reloadBlogs()
+   });
 }
 //Delete
- function deleteSource(id) {
-   sendHttpRequest('DELETE', `${url}/${id}`);
+ async function deleteSource(id) {
+   sendHttpRequest('DELETE', `${url}/${id}`)
+   .then(res => {
+    reloadBlogs()
+  });
 }
-
 async function getSingleSource(id) {
   const response = await fetch(`${url}/${id}`);
   const data = await response.json();
   return data;
 }
-
-function toApi() {
+ function toApi() {
   getBlog(function(blogs) {
-      getSource(blogs);
-      fresherItem (blogs);
-      nextPage(blogs);
-      prevPage(blogs);
-      fistPage(blogs);
-      lastPage(blogs);
+    fresherItem (blogs);
+    fistPage(blogs);
+    nextPage(blogs);
+    prevPage(blogs);
+    lastPage(blogs);
+    getSource(blogs);
   })
 }
 function getBlog(callback) {
-    fetch(url)
+  sendHttpRequest('GET', url)
         .then(function(response) {
-            return response.json();
+            return response;
         })
         .then(callback)
         .catch(function(error) {
             console.log(error);
         })
         .finally(function() {
-
         })
-        console.log(callback);
 }
 //Delete
-function deleteApi() {
+ function deleteApi() {
   tbodyScroll.addEventListener("click", async function (e) { 
     if (e.target.matches(".source-remove")) {
       const id = e.target.dataset.id;
-      deleteSource(id);
+      await deleteSource(id); 
     }  
   });
 }
@@ -95,7 +115,6 @@ function putApi() {
     if (e.target.matches(".source-edit")) {
       const id = e.target.dataset.id;
       const data = await getSingleSource(id);
-      console.log(data);
       wrapper.elements["id"].value = data.id;
       wrapper.elements["title"].value = data.title;
       wrapper.elements["createdAt"].value = data.createdAt;
@@ -104,14 +123,15 @@ function putApi() {
       formSubmit.textContent = "Update";
       updateId = id;
     }
-    getBlog()
   })
 }
-
-
+// Remove Update
+formRemoveUpdate.addEventListener("click", (e) =>{
+  getPage()
+})  
 // Submit
-function postApi() {
-  wrapper.addEventListener("submit",  function (e) {
+ function postApi() {
+  wrapper.addEventListener("submit", async function (e) {
     e.preventDefault();
     const source = {
       id: this.elements["id"].value,
@@ -120,15 +140,16 @@ function postApi() {
       image: this.elements["image"].value,
       content: this.elements["content"].value,
     };
-      updateId
-        ?  updateSource({ id: updateId, ...source })
-        :  addPost(source);
-        this.reset();
+    updateId
+    ? await updateSource({ id: updateId, ...source })
+    : await addPost(source);
+        this.reset(); 
+        updateId = null;
+        formSubmit.textContent = "POST"
       });
 }
-
-
-function getSource(blogs) {
+const productId = document.querySelector(".product-id")
+async function getSource(blogs) {
   let product = document.getElementById('product');
   let productItem = '';
   blogs.forEach(function(blog, index) {
@@ -163,15 +184,15 @@ let numberPage = document.getElementById('number-page');
 numberPage.innerHTML = `<p>${currentPage}</p>`;
 
 function fresherItem(blogs) {
-  let myInput = document.getElementById('myInput');
-  myInput.onchange = function() {
-      let myInputValue = document.getElementById('myInput').value;
-      perPage = myInputValue;
+  let mySelect = document.getElementById('mySelect');
+  mySelect.onchange = function() {
+      let mySelectValue = document.getElementById('mySelect').value;
+      perPage = mySelectValue;
       currentPage =1;
       numberPage.innerHTML = `<p>${currentPage}</p>`
       getCurrentPage(currentPage)
       getSource(blogs)
-  }
+    }
 }
 // click Next
 function nextPage(blogs) {
@@ -182,13 +203,13 @@ function nextPage(blogs) {
           numberPage.innerHTML = `<p>${currentPage}</p>`
           getCurrentPage(currentPage)
           btnNext.classList.add('activeFilter')
-          getSource(blogs)
+          getPage()
         }else {
           currentPage++;
           numberPage.innerHTML = `<p>${currentPage}</p>`
           getCurrentPage(currentPage)
           btnPrev.classList.remove('activeFilter')
-          getSource(blogs)
+          getPage()
       }    
   })
 }
@@ -199,14 +220,13 @@ function prevPage(blogs) {
           currentPage = 1;
           getCurrentPage(currentPage)
           btnPrev.classList.add('activeFilter')
-          getSource(blogs)
-      }else {
+           getPage()
+        }else {
           currentPage--;
           numberPage.innerHTML = `<p>${currentPage}</p>`
           getCurrentPage(currentPage) 
           btnNext.classList.remove('activeFilter')
-          getSource(blogs)
-         
+          getPage()
       }
   })
 }
@@ -218,7 +238,7 @@ function fistPage(blogs) {
       getCurrentPage(currentPage)
       btnNext.classList.remove('activeFilter')
       btnPrev.classList.add('activeFilter')
-      getSource(blogs)
+      getPage()
   })
 }
 // click LastPage
@@ -231,7 +251,7 @@ function lastPage(blogs) {
       btnNext.classList.add('activeFilter')
       btnPrev.classList.remove('activeFilter')
       btnPrev.classList.remove('activeFilter')
-      getSource(blogs)
+      getPage()
   })
 }
-export {toApi, postApi,putApi,deleteApi};
+export {toApi, postApi,putApi,deleteApi}
