@@ -118,17 +118,17 @@ function putApi() {
       wrapper.elements["id"].value = data.id;
       wrapper.elements["title"].value = data.title;
       wrapper.elements["createdAt"].value = data.createdAt;
-      wrapper.elements["image"].value = data.id;
-      wrapper.elements["content"].value = data.id;
+      wrapper.elements["image"].value = data.image;
+      wrapper.elements["content"].value = data.content;
       formSubmit.textContent = "Update";
       updateId = id;
-    }
+      console.log( data );
+    } 
   })
 }
-// Remove Update
-formRemoveUpdate.addEventListener("click", (e) =>{
-  getPage()
-})  
+formRemoveUpdate.addEventListener('click', function(e) {
+ 
+})
 // Submit
  function postApi() {
   wrapper.addEventListener("submit", async function (e) {
@@ -145,7 +145,7 @@ formRemoveUpdate.addEventListener("click", (e) =>{
     : await addPost(source);
         this.reset(); 
         updateId = null;
-        formSubmit.textContent = "POST"
+        formSubmit.textContent = "POST" 
       });
 }
 const productId = document.querySelector(".product-id")
@@ -163,7 +163,7 @@ async function getSource(blogs) {
               <tr class="trbody">
               <td>${id}</td>
               <td>${title}</td>
-              <td>${dateFull}</td>
+              <td>${createdAt}</td>
               <td>${image}</td>
               <td>${content}
               <button class="source-edit" data-id = ${id}> <i class="fa fa-list-alt"></i></button>
