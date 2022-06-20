@@ -120,15 +120,12 @@ function putApi() {
       wrapper.elements["createdAt"].value = data.createdAt;
       wrapper.elements["image"].value = data.image;
       wrapper.elements["content"].value = data.content;
-      formSubmit.textContent = "Update";
+      formSubmit.textContent = "Update or Reset";
       updateId = id;
       console.log( data );
     } 
   })
 }
-formRemoveUpdate.addEventListener('click', function(e) {
- 
-})
 // Submit
  function postApi() {
   wrapper.addEventListener("submit", async function (e) {
